@@ -1,0 +1,27 @@
+---
+- name: Import GPG key of MongoDB.
+  rpm_key:
+    key: https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc
+
+- name: Add MongoDB repository.
+  yum_repository:
+    name: mongodb-org-{{ mongodb_version }}
+    description: MongoDB Repository
+    file: mongodb-org-{{ mongodb_version }}.repo
+    baseurl: https://repo.mongodb.org/yum/redhat/{{ ansible_distribution_major_version }}/mongodb-org/{{ mongodb_version }}/{{ ansible_architecture }}/
+    enabled: no
+
+- name: Ensure MongoDB is installed.
+  yum:
+    name: mongodb-org
+    enablerepo: mongodb-org-{{ mongodb_version }}
+
+# service
+- name: Ensure MongoDB is started and enabled to start at boot.
+  service: name=mongod state=started enabled=yes
+  when: ansible_connection != 'docker'
+
+# clean up
+- name: Purge yum cache.
+  command: yum clean all
+  when: ansible_connection == 'docker'

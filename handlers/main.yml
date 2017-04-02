@@ -1,0 +1,4 @@
+---
+- name: restart MongoDB
+  service: name=mongod state=restarted
+  when: ansible_connection != 'docker'
